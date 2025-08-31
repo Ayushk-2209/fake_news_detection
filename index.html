@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fake News Detection</title>
+</head>
+<body>
+    <h1>Fake News Detection</h1>
+
+    <!-- Mode 1: Paste News Text -->
+    <h2>Paste News Text</h2>
+    <textarea id="news_text" rows="6" cols="80" placeholder="Paste full news article here"></textarea>
+    <button id="predictTextBtn">Predict</button>
+    <p id="textResult"></p>
+
+    <!-- Mode 2: Fetch News by Topic -->
+    <h2>Fetch News by Topic</h2>
+    <input type="text" id="query" placeholder="Enter topic">
+    <button id="fetchPredictBtn">Fetch & Predict</button>
+    <ul id="results"></ul>
+
+    <script>
+        // Predict pasted text
+        document.getElementById("predictTextBtn").onclick = async function(){
+            let text = document.getElementById("news_text").value;
+            const res = await fetch("/predict_text", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({text})
+            });
+            const data = await res.json();
+            document.getElementById("textResult").textContent = "Prediction: " + (data.prediction || data.error);
+        }
+
+        // Fetch news by topic
+        document.getElementById("fetchPredictBtn").onclick = async function(){
+            let query = document.getElementById("query").value;
+            const res = await fetch("/fetch_and_predict", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({query})
+            });
+            const data = await res.json();
+            let ul = document.getElementById("results");
+            ul.innerHTML = "";
+            data.forEach(item => {
+                let li = document.createElement("li");
+                li.textContent = `[${item.prediction}] ${item.text}`;
+                ul.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
